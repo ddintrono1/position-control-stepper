@@ -19,6 +19,10 @@ typedef struct{
 	int command_num;
 	uint8_t flag_id;
 	int flag_num;
+
+	int travelSpeed;
+	int workSpeed;
+
 } Command;
 
 void Command_Init(Command *command, uint8_t string[]);

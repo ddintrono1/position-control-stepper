@@ -5,6 +5,8 @@
  *      Author: Dell
  */
 
+#define clk_freq 84000000
+
 #include "stepper.h"
 
 
@@ -28,15 +30,20 @@ void Stepper_Init(Stepper* stepper, float stepDist, GPIO_TypeDef* enablePort, ui
 	// Set default not enabled (NOT ENABLED = HIGH)
 	HAL_GPIO_WritePin(enablePort, enablePin, GPIO_PIN_SET);
 
-	// Set default speed
+	// Set default speed for both working and travelling
 	stepper->htim->Instance->ARR = 839999;
 	stepper->htim->Instance->PSC = 0;
 	stepper->speed = (int) 84000000*stepper->stepDist/((stepper->htim->Instance->ARR+1)*(stepper->htim->Instance->PSC+1));
+
 
 }
 
 void Stepper_Enable(Stepper* stepper){
 	HAL_GPIO_WritePin(stepper->enablePort, stepper->enablePin, GPIO_PIN_RESET);
+}
+
+void Stepper_Disable(Stepper *stepper){
+	HAL_GPIO_WritePin(stepper->enablePort, stepper->enablePin, GPIO_PIN_SET);
 }
 
 void Stepper_Start(Stepper* stepper){
@@ -94,4 +101,3 @@ void Stepper_SetSpeed(Stepper* stepper, int speed){
 	__HAL_TIM_SET_COUNTER(stepper->htim,0);
 	__HAL_TIM_SET_AUTORELOAD(stepper->htim, (uint32_t) 84000000*stepper->stepDist/(stepper->speed*(stepper->htim->Instance->PSC+1))-1);
 }
-

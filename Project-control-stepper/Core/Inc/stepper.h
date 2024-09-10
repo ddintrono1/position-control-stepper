@@ -45,15 +45,15 @@ typedef enum {
     SIXTEENTH_STEP = 16, 	// 1/16 step
 } MicrosteppingMode;
 
-void Stepper_Init(Stepper* stepper, float stepDist, GPIO_TypeDef* enablePort, uint16_t enablePin, TIM_HandleTypeDef* htim, GPIO_TypeDef* stepPort, uint16_t stepPin, GPIO_TypeDef* dirPort, uint16_t dirPin,
-		GPIO_TypeDef* ms1Port, uint16_t ms1Pin, GPIO_TypeDef* ms2Port, uint16_t ms2Pin, GPIO_TypeDef* ms3Port, uint16_t ms3Pin);
-void Stepper_Enable(Stepper* stepper);
-void Stepper_Start(Stepper* stepper);
-void Stepper_Stop(Stepper* stepper);
-void Stepper_ToggleDirection(Stepper* stepper);
-void Stepper_SetDirection(Stepper* stepper, Direction direction);
-void Stepper_SetMicroStep(Stepper* stepper, MicrosteppingMode divider);
+void Stepper_Init(Stepper *stepper, float stepDist, GPIO_TypeDef *enablePort, uint16_t enablePin, TIM_HandleTypeDef *htim, GPIO_TypeDef *stepPort, uint16_t stepPin, GPIO_TypeDef *dirPort, uint16_t dirPin,
+		GPIO_TypeDef *ms1Port, uint16_t ms1Pin, GPIO_TypeDef *ms2Port, uint16_t ms2Pin, GPIO_TypeDef *ms3Port, uint16_t ms3Pin);
+void Stepper_Enable(Stepper *stepper);
+void Stepper_Disable(Stepper *stepper);
+void Stepper_Start(Stepper *stepper);
+void Stepper_Stop(Stepper *stepper);
+void Stepper_ToggleDirection(Stepper *stepper);
+void Stepper_SetDirection(Stepper *stepper, Direction direction);
+void Stepper_SetMicroStep(Stepper *stepper, MicrosteppingMode divider);
 void Stepper_SetSpeed(Stepper* stepper, int speed);
-
 
 #endif /* INC_STEPPER_H_ */

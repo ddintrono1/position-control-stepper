@@ -100,6 +100,17 @@ int main(void)
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 
+  // Reset interrupt flags before starting the timers
+  __HAL_TIM_CLEAR_FLAG(&htim3, TIM_FLAG_UPDATE);
+
+  // Start slave timer
+  HAL_TIM_Base_Start_IT(&htim3);
+
+  // Create stepper instance
+  Stepper_Init(&nema_17, 0.05, GPIOC, GPIO_PIN_10, &htim2, GPIOA, GPIO_PIN_0, GPIOC, GPIO_PIN_12, GPIOA, GPIO_PIN_12, GPIOA, GPIO_PIN_11, GPIOB, GPIO_PIN_12);
+
+  // Start uart connection
+  HAL_UART_Receive_IT(&huart2, rx_data, 1);
 
   /* USER CODE END 2 */
 
@@ -162,6 +173,23 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
+	if (huart->Instance == USART2){
+
+		if (*(rx_data+cnt) == '\r'){
+			Command_Init(&g_command, rx_data);
+			Command_Execute(&g_command);
+			cnt = -1;
+			memset(rx_data,0,sizeof(rx_data));
+			Command_Clear(&g_command);
+		}
+		cnt++;
+		HAL_UART_Receive_IT(&huart2, rx_data+cnt, 1);
+
+	}
+}
+
 
 /* USER CODE END 4 */
 
