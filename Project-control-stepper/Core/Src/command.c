@@ -22,14 +22,22 @@ uint8_t m204_message[] = "M204 command launched\r\n";
 
 void Command_Init(Command *command, uint8_t string[]){
 	strcpy((char *) command->string, (char *) string);
+
+	// Parsing della stringa
 	sscanf((char *) command->string, "%c %d %c %d", &(command->command_id), &(command->command_num), &(command->flag_id), &(command->flag_num));
 
-	// Setting default speed
+	// Setting default speeds and accelerations
 	if (command->travelSpeed == 0){
-		command->travelSpeed = 10;
+		command->travelSpeed = 40;
 	}
 	if (command->workSpeed == 0){
-		command->workSpeed = 5;
+		command->workSpeed = 20;
+	}
+	if (command->travelAcceleration == 0){
+		command->travelAcceleration = 30;
+	}
+	if (command->workAcceleration == 0){
+		command->workAcceleration = 15;
 	}
 }
 
@@ -53,7 +61,6 @@ void Command_Execute(Command *command){
 	}
 	else if (command->command_id == 'M' && command->command_num == 204){
 		Command_M204(command);
-		HAL_UART_Transmit_IT(&huart2, m204_message, sizeof(m204_message));
 	}
 	else {
 		HAL_UART_Transmit_IT(&huart2, error_message, sizeof(error_message));
@@ -63,8 +70,9 @@ void Command_Execute(Command *command){
 void Command_G0(Command *command){
 	// This command moves the extruder of a certain coordinate at travelling speed
 	__HAL_TIM_SET_AUTORELOAD(&htim3, command->flag_num);
+	command->speed = command->travelSpeed;
+	command->acceleration = command->travelAcceleration;
 	HAL_UART_Transmit_IT(&huart2, g0_message, sizeof(g0_message));
-	Stepper_SetSpeed(&nema_17, command->travelSpeed);
 	Stepper_Enable(&nema_17);
 	Stepper_Start(&nema_17);
 }
@@ -72,8 +80,9 @@ void Command_G0(Command *command){
 void Command_G1(Command *command){
 	// This command moves the extruder of a certain coordinate at working speed
 	__HAL_TIM_SET_AUTORELOAD(&htim3, command->flag_num);
+	command->speed = command->workSpeed;
+	command->acceleration = command->workAcceleration;
 	HAL_UART_Transmit_IT(&huart2, g1_message, sizeof(g1_message));
-	Stepper_SetSpeed(&nema_17, command->workSpeed);
 	Stepper_Enable(&nema_17);
 	Stepper_Start(&nema_17);
 }
@@ -96,16 +105,23 @@ void Command_M203(Command *command){
 }
 
 void Command_M204(Command *command){
+	if (command->flag_id == 'T'){
+		// Modify traveling acceleration
+		command->travelAcceleration = command->flag_num;
+		HAL_UART_Transmit_IT(&huart2, m204_message, sizeof(m204_message));
 
-}
+	}
+	else if (command->flag_id == 'S'){
+		// Modify extruding acceleration
+		command->workAcceleration = command->flag_num;
+		HAL_UART_Transmit_IT(&huart2, m204_message, sizeof(m204_message));
+	}
+	else {
+		HAL_UART_Transmit_IT(&huart2, error_message, sizeof(error_message));
 
-
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
-
-	if (htim->Instance == TIM3){
-		Stepper_Stop(&nema_17);
-		Stepper_Disable(&nema_17);
 	}
 }
+
+
 
 

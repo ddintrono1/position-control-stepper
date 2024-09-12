@@ -28,7 +28,7 @@ typedef struct {
 	GPIO_TypeDef* ms3Port;		// microstepping port 3
 	uint16_t ms3Pin;			// microstepping pin 3
 
-	int speed;
+	float speed;
 
 } Stepper;
 
@@ -54,6 +54,7 @@ void Stepper_Stop(Stepper *stepper);
 void Stepper_ToggleDirection(Stepper *stepper);
 void Stepper_SetDirection(Stepper *stepper, Direction direction);
 void Stepper_SetMicroStep(Stepper *stepper, MicrosteppingMode divider);
-void Stepper_SetSpeed(Stepper* stepper, int speed);
+void Stepper_SetSpeed(Stepper* stepper, float speed);
+void Stepper_SpeedUp(Stepper *stepper, float deltaSpeed);
 
 #endif /* INC_STEPPER_H_ */

@@ -19,9 +19,12 @@ typedef struct{
 	int command_num;
 	uint8_t flag_id;
 	int flag_num;
-
+	int speed;
 	int travelSpeed;
 	int workSpeed;
+	int acceleration;
+	int travelAcceleration;
+	int workAcceleration;
 
 } Command;
 

@@ -98,6 +98,7 @@ int main(void)
   MX_USART2_UART_Init();
   MX_TIM2_Init();
   MX_TIM3_Init();
+  MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
 
   // Reset interrupt flags before starting the timers
@@ -111,6 +112,9 @@ int main(void)
 
   // Start uart connection
   HAL_UART_Receive_IT(&huart2, rx_data, 1);
+
+  // DELETE
+  Stepper_SetMicroStep(&nema_17, QUARTER_STEP);
 
   /* USER CODE END 2 */
 
@@ -186,9 +190,31 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 		}
 		cnt++;
 		HAL_UART_Receive_IT(&huart2, rx_data+cnt, 1);
-
 	}
 }
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
+
+	// tim3 handles distances
+	if (htim->Instance == TIM3){
+		Stepper_Stop(&nema_17);
+		Stepper_Disable(&nema_17);
+	}
+
+	if (htim->Instance == TIM6){
+
+		if (nema_17.speed < g_command.speed){
+			// The division by 100 is due to 100 interrupts per sec
+			Stepper_SpeedUp(&nema_17, (float) g_command.acceleration / 100);
+		}
+		else {
+			HAL_TIM_Base_Stop_IT(&htim6);
+			__HAL_TIM_SET_COUNTER(&htim6, 0);
+			HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+		}
+	}
+}
+
 
 
 /* USER CODE END 4 */
