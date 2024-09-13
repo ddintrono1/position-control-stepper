@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "i2c.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -99,6 +100,7 @@ int main(void)
   MX_TIM2_Init();
   MX_TIM3_Init();
   MX_TIM6_Init();
+  MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
 
   // Reset interrupt flags before starting the timers
@@ -110,11 +112,15 @@ int main(void)
   // Create stepper instance
   Stepper_Init(&nema_17, 0.05, GPIOC, GPIO_PIN_10, &htim2, GPIOA, GPIO_PIN_0, GPIOC, GPIO_PIN_12, GPIOA, GPIO_PIN_12, GPIOA, GPIO_PIN_11, GPIOB, GPIO_PIN_12);
 
+  // Create command instance
+  Command_Init(&g_command, &nema_17);
+
   // Start uart connection
   HAL_UART_Receive_IT(&huart2, rx_data, 1);
 
-  // DELETE
+  // Set microstep
   Stepper_SetMicroStep(&nema_17, QUARTER_STEP);
+
 
   /* USER CODE END 2 */
 
@@ -182,7 +188,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 	if (huart->Instance == USART2){
 
 		if (*(rx_data+cnt) == '\r'){
-			Command_Init(&g_command, rx_data);
+			Command_Parse(&g_command, rx_data);
 			Command_Execute(&g_command);
 			cnt = -1;
 			memset(rx_data,0,sizeof(rx_data));
@@ -203,19 +209,19 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 
 	if (htim->Instance == TIM6){
 
-		if (nema_17.speed < g_command.speed){
+		if (nema_17.speed < nema_17.speedLimit){
 			// The division by 100 is due to 100 interrupts per sec
-			Stepper_SpeedUp(&nema_17, (float) g_command.acceleration / 100);
+			Stepper_SpeedUp(&nema_17, (float) nema_17.acceleration / 100);
 		}
 		else {
+
+			// Stop the timer responsible for accelerating the motor if the desired speed has been reached
 			HAL_TIM_Base_Stop_IT(&htim6);
 			__HAL_TIM_SET_COUNTER(&htim6, 0);
 			HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
 		}
 	}
 }
-
-
 
 /* USER CODE END 4 */
 

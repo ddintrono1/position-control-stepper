@@ -37,6 +37,8 @@ void Stepper_Init(Stepper* stepper, float stepDist, GPIO_TypeDef* enablePort, ui
 	stepper->htim->Instance->PSC = 0;
 	stepper->speed = (float) clk_freq*stepper->stepDist/((stepper->htim->Instance->ARR+1)*(stepper->htim->Instance->PSC+1));
 
+	// Set default acceleration
+	stepper->acceleration = 30;
 }
 
 void Stepper_Enable(Stepper* stepper){
@@ -48,10 +50,11 @@ void Stepper_Disable(Stepper *stepper){
 }
 
 void Stepper_Start(Stepper* stepper){
-	// Start at 0 speed
+
+	// Reset speed at launching
 	Stepper_SetSpeed(stepper, 0);
 
-	// Start PWM
+	// Start PWM timer which pulses the stepper
 	HAL_TIM_PWM_Start(stepper->htim, TIM_CHANNEL_1);
 
 	// Start timer responsible for accelerating the stepper
@@ -60,7 +63,12 @@ void Stepper_Start(Stepper* stepper){
 }
 
 void Stepper_Stop(Stepper* stepper){
+
+	// Start PWM timer which pulses the stepper
 	HAL_TIM_PWM_Stop(stepper->htim, TIM_CHANNEL_1);
+
+	// Stop the timer responsible for accelerating the motor
+	HAL_TIM_Base_Stop_IT(&htim6);
 }
 
 void Stepper_ToggleDirection(Stepper* stepper){
@@ -104,6 +112,10 @@ void Stepper_SetMicroStep(Stepper* stepper, MicrosteppingMode divider){
 	}
 }
 
+void Stepper_SetSpeedLimit(Stepper* stepper, float speedLimit){
+	stepper->speedLimit = speedLimit;
+}
+
 void Stepper_SetSpeed(Stepper* stepper, float speed){
 	stepper->speed = speed;
 	// resetting the CNT to avoid CNT>ARR when speeding up (ARR decreases)
@@ -113,6 +125,10 @@ void Stepper_SetSpeed(Stepper* stepper, float speed){
 
 void Stepper_SpeedUp(Stepper *stepper, float deltaSpeed){
 	Stepper_SetSpeed(stepper, stepper->speed + deltaSpeed);
+}
+
+void Stepper_SetAcceleration(Stepper *stepper, float acceleration){
+	stepper->acceleration = acceleration;
 }
 
 

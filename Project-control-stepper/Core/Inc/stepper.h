@@ -29,6 +29,8 @@ typedef struct {
 	uint16_t ms3Pin;			// microstepping pin 3
 
 	float speed;
+	float speedLimit;
+	float acceleration;
 
 } Stepper;
 
@@ -56,5 +58,7 @@ void Stepper_SetDirection(Stepper *stepper, Direction direction);
 void Stepper_SetMicroStep(Stepper *stepper, MicrosteppingMode divider);
 void Stepper_SetSpeed(Stepper* stepper, float speed);
 void Stepper_SpeedUp(Stepper *stepper, float deltaSpeed);
+void Stepper_SetSpeedLimit(Stepper *stepper, float speed);
+void Stepper_SetAcceleration(Stepper *stepper, float acceleration);
 
 #endif /* INC_STEPPER_H_ */

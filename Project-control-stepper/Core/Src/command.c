@@ -11,7 +11,6 @@
 
 extern UART_HandleTypeDef huart2;
 extern TIM_HandleTypeDef htim3;
-extern Stepper nema_17;
 
 uint8_t error_message[] = "ERROR: unvalid command\r\n";
 uint8_t g0_message[] = "G0 command launched\r\n";
@@ -20,25 +19,23 @@ uint8_t m203_message[] = "M203 command launched\r\n";
 uint8_t m204_message[] = "M204 command launched\r\n";
 
 
-void Command_Init(Command *command, uint8_t string[]){
-	strcpy((char *) command->string, (char *) string);
-
-	// Parsing della stringa
-	sscanf((char *) command->string, "%c %d %c %d", &(command->command_id), &(command->command_num), &(command->flag_id), &(command->flag_num));
+void Command_Init(Command *command, Stepper *stepper){
+	command->stepper = stepper;
 
 	// Setting default speeds and accelerations
-	if (command->travelSpeed == 0){
-		command->travelSpeed = 40;
-	}
-	if (command->workSpeed == 0){
-		command->workSpeed = 20;
-	}
-	if (command->travelAcceleration == 0){
-		command->travelAcceleration = 30;
-	}
-	if (command->workAcceleration == 0){
-		command->workAcceleration = 15;
-	}
+	command->travelSpeed = 40;
+	command->workSpeed = 20;
+	command->travelAcceleration = 30;
+	command->workAcceleration = 15;
+
+}
+
+void Command_Parse(Command *command, uint8_t string[]){
+	// String setting
+	strcpy((char *) command->string, (char *) string);
+
+	// String parsing
+	sscanf((char *) command->string, "%c %d %c %d", &(command->command_id), &(command->command_num), &(command->flag_id), &(command->flag_num));
 }
 
 void Command_Clear(Command *command){
@@ -68,23 +65,23 @@ void Command_Execute(Command *command){
 }
 
 void Command_G0(Command *command){
-	// This command moves the extruder of a certain coordinate at travelling speed
+	// This command handles the pulses number before stopping
 	__HAL_TIM_SET_AUTORELOAD(&htim3, command->flag_num);
-	command->speed = command->travelSpeed;
-	command->acceleration = command->travelAcceleration;
+	Stepper_SetSpeedLimit(command->stepper, command->travelSpeed);
+	Stepper_SetAcceleration(command->stepper, command->travelAcceleration);
 	HAL_UART_Transmit_IT(&huart2, g0_message, sizeof(g0_message));
-	Stepper_Enable(&nema_17);
-	Stepper_Start(&nema_17);
+	Stepper_Enable(command->stepper);
+	Stepper_Start(command->stepper);
 }
 
 void Command_G1(Command *command){
-	// This command moves the extruder of a certain coordinate at working speed
+	// This command handles the pulses number before stopping
 	__HAL_TIM_SET_AUTORELOAD(&htim3, command->flag_num);
-	command->speed = command->workSpeed;
-	command->acceleration = command->workAcceleration;
-	HAL_UART_Transmit_IT(&huart2, g1_message, sizeof(g1_message));
-	Stepper_Enable(&nema_17);
-	Stepper_Start(&nema_17);
+	Stepper_SetSpeedLimit(command->stepper, command->workSpeed);
+	Stepper_SetAcceleration(command->stepper, command->workAcceleration);
+	HAL_UART_Transmit_IT(command->stepper, g1_message, sizeof(g1_message));
+	Stepper_Enable(command->stepper);
+	Stepper_Start(command->stepper);
 }
 
 void Command_M203(Command *command){
