@@ -18,7 +18,6 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "i2c.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -100,7 +99,6 @@ int main(void)
   MX_TIM2_Init();
   MX_TIM3_Init();
   MX_TIM6_Init();
-  MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
 
   // Reset interrupt flags before starting the timers
@@ -120,7 +118,6 @@ int main(void)
 
   // Set microstep
   Stepper_SetMicroStep(&nema_17, QUARTER_STEP);
-
 
   /* USER CODE END 2 */
 
@@ -201,12 +198,13 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 
-	// tim3 handles distances
+	// Tim3 handles distances
 	if (htim->Instance == TIM3){
 		Stepper_Stop(&nema_17);
 		Stepper_Disable(&nema_17);
 	}
 
+	// Tim6 handles accelerations
 	if (htim->Instance == TIM6){
 
 		if (nema_17.speed < nema_17.speedLimit){

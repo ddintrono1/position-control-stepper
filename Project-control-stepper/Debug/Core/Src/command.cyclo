@@ -1,8 +1,9 @@
-../Core/Src/command.c:22:6:Command_Init	1
-../Core/Src/command.c:33:6:Command_Parse	1
-../Core/Src/command.c:41:6:Command_Clear	1
-../Core/Src/command.c:49:6:Command_Execute	9
-../Core/Src/command.c:67:6:Command_G0	1
-../Core/Src/command.c:77:6:Command_G1	1
-../Core/Src/command.c:87:6:Command_M203	3
-../Core/Src/command.c:104:6:Command_M204	3
+../Core/Src/command.c:24:6:Command_Init	1
+../Core/Src/command.c:35:6:Command_Parse	1
+../Core/Src/command.c:43:6:Command_Clear	1
+../Core/Src/command.c:51:6:Command_Execute	11
+../Core/Src/command.c:72:6:Command_G0	1
+../Core/Src/command.c:82:6:Command_G1	1
+../Core/Src/command.c:92:6:Command_M203	3
+../Core/Src/command.c:109:6:Command_M204	3
+../Core/Src/command.c:127:6:Command_M205	3

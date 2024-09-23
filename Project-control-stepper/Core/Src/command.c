@@ -17,6 +17,8 @@ uint8_t g0_message[] = "G0 command launched\r\n";
 uint8_t g1_message[] = "G1 command launched\r\n";
 uint8_t m203_message[] = "M203 command launched\r\n";
 uint8_t m204_message[] = "M204 command launched\r\n";
+uint8_t m205_message_clockwise[] = "M205 command launched: clockwise rotation\r\n";
+uint8_t m205_message_anticlockwise[] = "M205 command launched: anti-clockwise rotation\r\n";
 
 
 void Command_Init(Command *command, Stepper *stepper){
@@ -59,6 +61,9 @@ void Command_Execute(Command *command){
 	else if (command->command_id == 'M' && command->command_num == 204){
 		Command_M204(command);
 	}
+	else if (command->command_id == 'M' && command->command_num == 205){
+		Command_M205(command);
+	}
 	else {
 		HAL_UART_Transmit_IT(&huart2, error_message, sizeof(error_message));
 	}
@@ -79,7 +84,7 @@ void Command_G1(Command *command){
 	__HAL_TIM_SET_AUTORELOAD(&htim3, command->flag_num);
 	Stepper_SetSpeedLimit(command->stepper, command->workSpeed);
 	Stepper_SetAcceleration(command->stepper, command->workAcceleration);
-	HAL_UART_Transmit_IT(command->stepper, g1_message, sizeof(g1_message));
+	HAL_UART_Transmit_IT(&huart2, g1_message, sizeof(g1_message));
 	Stepper_Enable(command->stepper);
 	Stepper_Start(command->stepper);
 }
@@ -116,6 +121,20 @@ void Command_M204(Command *command){
 	else {
 		HAL_UART_Transmit_IT(&huart2, error_message, sizeof(error_message));
 
+	}
+}
+
+void Command_M205(Command *command){
+	if (command->flag_num == 1){
+		Stepper_SetDirection(command->stepper, CLOCKWISE);
+		HAL_UART_Transmit_IT(&huart2, m205_message_clockwise, sizeof(m205_message_clockwise));
+	}
+	else if (command->flag_num == 2){
+		Stepper_SetDirection(command->stepper, ANTI_CLOCKWISE);
+		HAL_UART_Transmit_IT(&huart2, m205_message_anticlockwise, sizeof(m205_message_anticlockwise));
+	}
+	else {
+		HAL_UART_Transmit_IT(&huart2, error_message, sizeof(error_message));
 	}
 }
 

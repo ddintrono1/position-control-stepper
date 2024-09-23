@@ -39,5 +39,6 @@ void Command_G0(Command *command);
 void Command_G1(Command *command);
 void Command_M203(Command *command);
 void Command_M204(Command *command);
+void Command_M205(Command *command);
 
 #endif /* INC_COMMAND_H_ */
