@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "i2c.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -27,6 +28,9 @@
 #include "stepper.h"
 #include "command.h"
 #include "string.h"
+#include "vl53l0x_api.h"
+#include "vl53l0x_platform.h"
+#include "stm32f4xx_hal.h"
 
 /* USER CODE END Includes */
 
@@ -52,6 +56,20 @@ Stepper nema_17;
 Command g_command;
 uint8_t rx_data[20];
 uint8_t cnt=0;
+//I2C_HandleTypeDef hi2c1;
+
+VL53L0X_Dev_t vl53l0x_dev;
+VL53L0X_Error status;
+VL53L0X_RangingMeasurementData_t RangingData;
+// Sensor calibration variables
+uint8_t VhvSettings = 0;
+uint8_t PhaseCal = 0;
+uint32_t refSpadCount;
+uint8_t isApertureSpads;
+int32_t CalDistanceMilliMeter = 100;
+int32_t pOffsetMicroMeter;
+
+uint32_t mean;							// mod
 
 /* USER CODE END PV */
 
@@ -59,10 +77,33 @@ uint8_t cnt=0;
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void VL53L0X_Init(){
+
+    vl53l0x_dev.I2cHandle = &hi2c1;	 // I2C handler
+    vl53l0x_dev.I2cDevAddr = 0x52;   // Indirizzo del VL53L0X
+
+    // Wait until the device has been completely booted, BLOCKING FUNCTION
+    status = VL53L0X_WaitDeviceBooted(&vl53l0x_dev);
+    // Initialize data
+    status = VL53L0X_DataInit(&vl53l0x_dev);
+    status = VL53L0X_StaticInit(&vl53l0x_dev);
+    // Perform SPADs calibration
+    status = VL53L0X_PerformRefSpadManagement(&vl53l0x_dev, &refSpadCount, &isApertureSpads);
+    // Perform temperature calibration
+    status = VL53L0X_PerformRefCalibration(&vl53l0x_dev, &VhvSettings, &PhaseCal);
+    // Perform offset calibration
+    VL53L0X_PerformOffsetCalibration(&vl53l0x_dev, CalDistanceMilliMeter, &pOffsetMicroMeter);
+    // Set continuous ranging mode
+    status = VL53L0X_SetDeviceMode(&vl53l0x_dev, VL53L0X_DEVICEMODE_CONTINUOUS_RANGING);
+    // Imposta la distanza minima e massima
+    VL53L0X_SetMeasurementTimingBudgetMicroSeconds(&vl53l0x_dev, 10000);  		//mod
+    status = VL53L0X_StartMeasurement(&vl53l0x_dev);
+}
 
 /* USER CODE END 0 */
 
@@ -99,6 +140,7 @@ int main(void)
   MX_TIM2_Init();
   MX_TIM3_Init();
   MX_TIM6_Init();
+  MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
 
   // Reset interrupt flags before starting the timers
@@ -119,12 +161,23 @@ int main(void)
   // Set microstep
   Stepper_SetMicroStep(&nema_17, QUARTER_STEP);
 
+  // Initialize distance sensor
+  VL53L0X_Init();
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
+//	  status = VL53L0X_GetRangingMeasurementData(&vl53l0x_dev, &RangingData);
+//	  char msg[64];
+//	  sprintf(msg, "Distanza: %u mm\r\n", RangingData.RangeMilliMeter);
+//	  HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
+//
+//	  HAL_Delay(1000); // Ritardo per evitare invii troppo frequenti
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -181,6 +234,10 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
+	status = VL53L0X_GetRangingMeasurementData(&vl53l0x_dev, &RangingData);
+}
+
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 	if (huart->Instance == USART2){
 
@@ -216,7 +273,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			// Stop the timer responsible for accelerating the motor if the desired speed has been reached
 			HAL_TIM_Base_Stop_IT(&htim6);
 			__HAL_TIM_SET_COUNTER(&htim6, 0);
-			HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
 		}
 	}
 }

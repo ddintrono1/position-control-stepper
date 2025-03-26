@@ -1,0 +1,3 @@
+../Core/Src/tof_sensor.c:22:6:TOF_Init	16	static
+../Core/Src/tof_sensor.c:43:10:TOF_GetDistance	8	static
+../Core/Src/tof_sensor.c:51:9:TOF_GetFilteredDistance	24	static
