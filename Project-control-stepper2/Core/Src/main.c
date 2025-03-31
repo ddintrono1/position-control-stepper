@@ -61,7 +61,7 @@ float Ki;
 float Kd;
 int16_t distance;
 int16_t speed;
-uint8_t speed_threshold = 2;
+uint8_t speed_threshold = 3;
 
 /* USER CODE END PV */
 
@@ -126,7 +126,10 @@ int main(void)
   PID_Init(&pid, Kp, Ki, Kd, -100, 100);
 
   // Initializing setpoint
-  PID_UpdateSetpoint(&pid, 250);
+  PID_UpdateSetpoint(&pid, 0);
+
+  // Command initialization
+  Command_Init(&g_command, &pid, &huart2);
 
   // Starting uart communication
   HAL_UART_Receive_IT(&huart2, rx_data , 1);
@@ -134,7 +137,7 @@ int main(void)
   // Starting control timer
   HAL_TIM_Base_Start_IT(&htim7);
 
-
+  // Activating motor
   Stepper_Enable(&nema_17);
   Stepper_Start(&nema_17);
 

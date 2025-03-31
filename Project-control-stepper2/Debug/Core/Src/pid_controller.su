@@ -1,3 +1,6 @@
 ../Core/Src/pid_controller.c:11:6:PID_Init	32	static
 ../Core/Src/pid_controller.c:25:7:PID_Compute	48	static
 ../Core/Src/pid_controller.c:55:6:PID_UpdateSetpoint	16	static
+../Core/Src/pid_controller.c:62:6:PID_UpdateProportional	16	static
+../Core/Src/pid_controller.c:69:6:PID_UpdateIntegral	16	static
+../Core/Src/pid_controller.c:76:6:PID_UpdateDerivative	16	static

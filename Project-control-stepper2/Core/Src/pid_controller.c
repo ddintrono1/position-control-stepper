@@ -59,5 +59,23 @@ void PID_UpdateSetpoint(PID_Controller* pid, float setpoint){
 	pid->setpoint = setpoint;
 }
 
+void PID_UpdateProportional(PID_Controller* pid, float Kp){
+	/*
+	 * This function updates the proportional gain to a given value
+	 */
+	pid->Kp = Kp;
+}
 
+void PID_UpdateIntegral(PID_Controller* pid, float Ki){
+	/*
+	 * This function updates the integral gain to a given value
+	 */
+	pid->Ki = Ki;
+}
 
+void PID_UpdateDerivative(PID_Controller* pid, float Kd){
+	/*
+	 * This function updates the derivative gain to a given value
+	 */
+	pid->Kd = Kd;
+}

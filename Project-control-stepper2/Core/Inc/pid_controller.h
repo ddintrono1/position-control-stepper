@@ -26,5 +26,8 @@ typedef struct {
 void PID_Init(PID_Controller *pid, float Kp, float Ki, float Kd, float out_min, float out_max);
 float PID_Compute(PID_Controller *pid, float measurement, float dt);
 void PID_UpdateSetpoint(PID_Controller* pid, float setpoint);
+void PID_UpdateProportional(PID_Controller* pid, float Kp);
+void PID_UpdateIntegral(PID_Controller* pid, float Ki);
+void PID_UpdateDerivative(PID_Controller* pid, float Kd);
 
 #endif /* INC_PID_CONTROLLER_H_ */

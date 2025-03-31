@@ -1,3 +1,6 @@
 ../Core/Src/pid_controller.c:11:6:PID_Init	1
 ../Core/Src/pid_controller.c:25:7:PID_Compute	3
 ../Core/Src/pid_controller.c:55:6:PID_UpdateSetpoint	1
+../Core/Src/pid_controller.c:62:6:PID_UpdateProportional	1
+../Core/Src/pid_controller.c:69:6:PID_UpdateIntegral	1
+../Core/Src/pid_controller.c:76:6:PID_UpdateDerivative	1
