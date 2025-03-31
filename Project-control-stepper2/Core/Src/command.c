@@ -64,23 +64,32 @@ void Command_Execute(Command *command){
 }
 
 void Command_G0(Command *command){
-
+	/*
+	 * This function sets a new setpoint
+	 */
+	HAL_UART_Transmit_IT(&huart2, g0_message, sizeof(g0_message));
 
 }
 
 void Command_G1(Command *command){
-	// This command handles the pulses number before stopping
+	/*
+	 * This function sets a new setpoint to be reached with new PID parameters
+	 */
+	HAL_UART_Transmit_IT(&huart2, g1_message, sizeof(g1_message));
 
 }
 
 void Command_M203(Command *command){
-	// This command sets the travelling or working speed
+	/*
+	 * This command modifies PID parameters for G0 and G1 in a 0-100 value
+	 */
 	if (command->flag_id == 'T'){
+		HAL_UART_Transmit_IT(&huart2, m203_message, sizeof(m203_message));
 
 	}
 	else if (command->flag_id == 'S'){
 		// Modify extruding speed
-
+		HAL_UART_Transmit_IT(&huart2, m203_message, sizeof(m203_message));
 	}
 	else {
 		HAL_UART_Transmit_IT(&huart2, error_message, sizeof(error_message));

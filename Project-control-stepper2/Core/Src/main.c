@@ -28,7 +28,8 @@
 #include <math.h>
 #include "tof_sensor.h"
 #include "stepper.h"
-#include  "pid_controller.h"
+#include "pid_controller.h"
+#include "command.h"
 
 /* USER CODE END Includes */
 
@@ -51,13 +52,16 @@
 
 /* USER CODE BEGIN PV */
 Stepper nema_17;
+Command g_command;
+uint8_t rx_data[20];
+uint8_t cnt=0;
 PID_Controller pid;
 float Kp;
 float Ki;
 float Kd;
 int16_t distance;
 int16_t speed;
-uint8_t speed_threshold = 1;
+uint8_t speed_threshold = 2;
 
 /* USER CODE END PV */
 
@@ -122,9 +126,12 @@ int main(void)
   PID_Init(&pid, Kp, Ki, Kd, -100, 100);
 
   // Initializing setpoint
-  PID_UpdateSetpoint(&pid, 150);
+  PID_UpdateSetpoint(&pid, 250);
 
-  // Starting control timer*********************************************
+  // Starting uart communication
+  HAL_UART_Receive_IT(&huart2, rx_data , 1);
+
+  // Starting control timer
   HAL_TIM_Base_Start_IT(&htim7);
 
 
@@ -201,6 +208,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		 * Timer 7 is the control timer. It actuates control action every sample time
 		 */
 		distance = TOF_GetFilteredDistance(0, 1500);
+
 		if (distance != -1){
 			speed = PID_Compute(&pid, distance, 0.01f);
 
@@ -224,10 +232,27 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		else {
 			return;
 		}
-
 	}
 
+}
 
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
+
+	if (huart->Instance == USART2){
+
+
+		if (*(rx_data+cnt) == '\r'){
+
+			// This part of code gets exected when the command is lauched from the terminal
+			Command_Parse(&g_command, rx_data);
+			Command_Execute(&g_command);
+			cnt = -1;
+			memset(rx_data,0,sizeof(rx_data));
+			Command_Clear(&g_command);
+		}
+		cnt++;
+		HAL_UART_Receive_IT(&huart2, rx_data+cnt, 1);
+	}
 }
 
 /* USER CODE END 4 */
