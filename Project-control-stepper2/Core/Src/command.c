@@ -180,11 +180,11 @@ void Command_M205(Command *command) {
 	 */
 	if (command->flag_num >= 0 && command->flag_num <= 100) {
 		if (command->flag_id == 'T'){
-				command->Kd0 = command->flag_num;
+				command->Kd0 = command->flag_num * 0.001;
 				HAL_UART_Transmit_IT(command->huart, m205_message, sizeof(m205_message));
 			}
 			else if (command->flag_id == 'S'){
-				command->Kd1 = command->flag_num;
+				command->Kd1 = command->flag_num * 0.001;
 				HAL_UART_Transmit_IT(command->huart, m205_message, sizeof(m205_message));
 			}
 			else{
