@@ -48,7 +48,7 @@ float PID_Compute(PID_Controller *pid, float measurement, float dt) {
     if (output > pid->output_max) output = pid->output_max;
     if (output < pid->output_min) output = pid->output_min;
 
-    // Null output if the computed control action is too low
+    // Neglect small control actions
     if (fabs(output)< pid->threshold) output = 0.0f;
 
     // Updating previous error

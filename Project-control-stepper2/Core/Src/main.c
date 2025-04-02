@@ -30,6 +30,7 @@
 #include "stepper.h"
 #include "pid_controller.h"
 #include "command.h"
+#include "command_instructions.h"
 
 /* USER CODE END Includes */
 
@@ -53,14 +54,42 @@
 /* USER CODE BEGIN PV */
 Stepper nema_17;
 Command g_command;
+PID_Controller pid;
+
+// UART communication data
 uint8_t rx_data[20];
 uint8_t cnt=0;
-PID_Controller pid;
-float Kp;
-float Ki;
-float Kd;
+
+// PID data
+float Kp = 0.1f;
+float Ki = 0.0f;
+float Kd = 0.0f;
+float out_min = -100.0f;
+float out_max = 100.0f;
+float out_threshold = 0.0f;
+
+// Control data
 int16_t distance;
 int16_t speed;
+
+// Stepper motor parameters
+float step_angle = 0.05f;
+GPIO_TypeDef *step_port = GPIOC;
+uint16_t step_pin = GPIO_PIN_10;
+TIM_HandleTypeDef *step_timer = &htim2;
+
+GPIO_TypeDef *dir_port = GPIOA;
+uint16_t dir_pin = GPIO_PIN_0;
+
+GPIO_TypeDef *ms1_port = GPIOC;
+uint16_t ms1_pin = GPIO_PIN_12;
+GPIO_TypeDef *ms2_port = GPIOA;
+uint16_t ms2_pin = GPIO_PIN_12;
+GPIO_TypeDef *ms3_port = GPIOA;
+uint16_t ms3_pin = GPIO_PIN_11;
+
+GPIO_TypeDef *enable_port = GPIOB;
+uint16_t enable_pin = GPIO_PIN_12;
 
 /* USER CODE END PV */
 
@@ -115,20 +144,24 @@ int main(void)
   TOF_Init(100);
 
   // Stepper initialization, microstepping initialization
-  Stepper_Init(&nema_17, 0.05, GPIOC, GPIO_PIN_10, &htim2, GPIOA, GPIO_PIN_0, GPIOC, GPIO_PIN_12, GPIOA, GPIO_PIN_12, GPIOA, GPIO_PIN_11, GPIOB, GPIO_PIN_12);
+  Stepper_Init(&nema_17, step_angle,
+               step_port, step_pin,
+               step_timer,
+               dir_port, dir_pin,
+               ms1_port, ms1_pin,
+               ms2_port, ms2_pin,
+               ms3_port, ms3_pin,
+               enable_port, enable_pin);
   Stepper_SetMicroStep(&nema_17, QUARTER_STEP);
 
   // Controller initialization
-  Kp = 0.1;
-  Ki = 0;
-  Kd = 0;
-  PID_Init(&pid, Kp, Ki, Kd, -100, 100, 0.0f);
-
-  // Initializing setpoint
-  PID_UpdateSetpoint(&pid, 0);
+  PID_Init(&pid, Kp, Ki, Kd, out_min, out_max, out_threshold);
 
   // Command initialization
   Command_Init(&g_command, &pid, &huart2);
+
+  // Send instructions through UART
+  HAL_UART_Transmit_IT(&huart2, command_help_message, sizeof(command_help_message));
 
   // Starting uart communication
   HAL_UART_Receive_IT(&huart2, rx_data , 1);

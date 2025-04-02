@@ -10,13 +10,14 @@
 #include "pid_controller.h"
 
 
-uint8_t error_message[] = "ERROR: unvalid command\r\n";
-uint8_t g0_message[] = "G0 command launched\r\n";
-uint8_t g1_message[] = "G1 command launched\r\n";
-uint8_t m203_message[] = "M203 command launched\r\n";
-uint8_t m204_message[] = "M204 command launched\r\n";
-uint8_t m205_message[] = "M205 command launched\r\n";
-uint8_t t0_message[] = "T0 command launched\r\n";
+// Command messages
+const uint8_t error_message[] = "ERROR: unvalid command\r\n";
+const uint8_t g0_message[] = "G0 command launched\r\n";
+const uint8_t g1_message[] = "G1 command launched\r\n";
+const uint8_t m203_message[] = "M203 command launched\r\n";
+const uint8_t m204_message[] = "M204 command launched\r\n";
+const uint8_t m205_message[] = "M205 command launched\r\n";
+const uint8_t t0_message[] = "T0 command launched\r\n";
 
 
 void Command_Init(Command *command, PID_Controller *pid, UART_HandleTypeDef *huart){

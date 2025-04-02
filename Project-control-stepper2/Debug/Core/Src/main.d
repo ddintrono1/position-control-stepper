@@ -36,7 +36,8 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Core/Inc/vl53l0x_types.h ../Core/Inc/vl53l0x_platform.h \
  ../Core/Inc/vl53l0x_platform_log.h ../Core/Inc/i2c.h \
  ../Core/Inc/stepper.h ../Core/Inc/pid_controller.h ../Core/Inc/command.h \
- ../Core/Inc/usart.h ../Core/Inc/pid_controller.h
+ ../Core/Inc/usart.h ../Core/Inc/pid_controller.h \
+ ../Core/Inc/command_instructions.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
@@ -87,3 +88,4 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Core/Inc/command.h:
 ../Core/Inc/usart.h:
 ../Core/Inc/pid_controller.h:
+../Core/Inc/command_instructions.h:
