@@ -16,11 +16,12 @@ uint8_t g1_message[] = "G1 command launched\r\n";
 uint8_t m203_message[] = "M203 command launched\r\n";
 uint8_t m204_message[] = "M204 command launched\r\n";
 uint8_t m205_message[] = "M205 command launched\r\n";
+uint8_t t0_message[] = "T0 command launched\r\n";
 
 
 void Command_Init(Command *command, PID_Controller *pid, UART_HandleTypeDef *huart){
 	/*
-	 * Assign a pid and a uart to the command, sets default gains
+	 * Assign a pid and a uart to the command, sets default gains and thresholds
 	 */
 
 	command->pid = pid;
@@ -32,6 +33,8 @@ void Command_Init(Command *command, PID_Controller *pid, UART_HandleTypeDef *hua
 	command->Ki1 = command->pid->Ki;
 	command->Kd0 = command->pid->Kd;
 	command->Kd1 = command->pid->Kd;
+	command->threshold0 = command->pid->threshold;
+	command->threshold1 = command->pid->threshold;
 
 }
 
@@ -59,29 +62,37 @@ void Command_Clear(Command *command){
 }
 
 void Command_Execute(Command *command){
-	/*
-	 * This function runs the command
-	 */
+    /*
+     * This function runs the corresponding command
+     */
 
-	if (command->command_id == 'G' && command-> command_num == 0){
-		Command_G0(command);
-	}
-	else if (command->command_id == 'G' && command->command_num == 1){
-		Command_G1(command);
-	}
-	else if (command->command_id == 'M' && command->command_num == 203){
-		Command_M203(command);
-	}
-	else if (command->command_id == 'M' && command->command_num == 204){
-		Command_M204(command);
-	}
-	else if (command->command_id == 'M' && command->command_num == 205){
-		Command_M205(command);
-	}
-	else {
-		HAL_UART_Transmit_IT(command->huart, error_message, sizeof(error_message));
-	}
+    switch (command->command_id) {
+        case 'G':
+            switch (command->command_num) {
+                case 0: Command_G0(command); return;
+                case 1: Command_G1(command); return;
+            }
+            break;
+
+        case 'M':
+            switch (command->command_num) {
+                case 203: Command_M203(command); return;
+                case 204: Command_M204(command); return;
+                case 205: Command_M205(command); return;
+            }
+            break;
+
+        case 'T':
+            if (command->command_num == 0) {
+                Command_T0(command);
+                return;
+            }
+            break;
+    }
+
+    HAL_UART_Transmit_IT(command->huart, error_message, sizeof(error_message));
 }
+
 
 void Command_G0(Command *command){
 	/*
@@ -93,13 +104,15 @@ void Command_G0(Command *command){
 		PID_UpdateIntegral(command->pid, command->Ki0);
 		PID_UpdateDerivative(command->pid, command->Kd0);
 
+		PID_UpdateThreshold(command->pid, command->threshold0);
+
 		PID_UpdateSetpoint(command->pid, command->flag_num);
 
 		HAL_UART_Transmit_IT(command->huart, g0_message, sizeof(g0_message));
+		return;
 	}
-	else {
-		HAL_UART_Transmit_IT(command->huart, error_message, sizeof(error_message));
-	}
+
+	HAL_UART_Transmit_IT(command->huart, error_message, sizeof(error_message));
 
 }
 
@@ -113,13 +126,14 @@ void Command_G1(Command *command){
 		PID_UpdateIntegral(command->pid, command->Ki1);
 		PID_UpdateDerivative(command->pid, command->Kd1);
 
+		PID_UpdateThreshold(command->pid, command->threshold1);
+
 		PID_UpdateSetpoint(command->pid, command->flag_num);
 
 		HAL_UART_Transmit_IT(command->huart, g1_message, sizeof(g1_message));
+		return;
 	}
-	else {
-		HAL_UART_Transmit_IT(command->huart, error_message, sizeof(error_message));
-	}
+	HAL_UART_Transmit_IT(command->huart, error_message, sizeof(error_message));
 
 }
 
@@ -129,23 +143,23 @@ void Command_M203(Command *command){
 	 */
 
 	// Check if the provided value for Kp is in the range 0-100%
-	if (command->flag_num >= 0 && command->flag_num <= 100){
-
-		if (command->flag_id == 'T'){
-			command->Kp0 = command->flag_num * 0.01;
-			HAL_UART_Transmit_IT(command->huart, m203_message, sizeof(m203_message));
-		}
-		else if (command->flag_id == 'S'){
-			command->Kp1 = command->flag_num * 0.01;
-			HAL_UART_Transmit_IT(command->huart, m203_message, sizeof(m203_message));
-		}
-		else {
-			HAL_UART_Transmit_IT(command->huart, error_message, sizeof(error_message));
-		}
-	}
-	else {
+	if (command->flag_num < 0 || command->flag_num > 100){
 		HAL_UART_Transmit_IT(command->huart, error_message, sizeof(error_message));
+		return;
 	}
+
+	if (command->flag_id == 'T'){
+		command->Kp0 = command->flag_num * 0.01;
+		HAL_UART_Transmit_IT(command->huart, m203_message, sizeof(m203_message));
+		return;
+	}
+	if (command->flag_id == 'S'){
+		command->Kp1 = command->flag_num * 0.01;
+		HAL_UART_Transmit_IT(command->huart, m203_message, sizeof(m203_message));
+		return;
+	}
+
+	HAL_UART_Transmit_IT(command->huart, error_message, sizeof(error_message));
 
 }
 
@@ -153,24 +167,25 @@ void Command_M204(Command *command) {
 	/*
 	 * This command modifies integral gain for G0 and G1 in a 0-100% range
 	 */
-	if (command->flag_num >= 0 && command->flag_num <= 100){
 
-		if(command->flag_id == 'T'){
-			command->Ki0 = command->flag_num * 0.001;
-			HAL_UART_Transmit_IT(command->huart, m204_message, sizeof(m204_message));
-		}
-		else if (command->flag_id == 'S'){
-			command->Ki1 = command->flag_num * 0.001;
-			HAL_UART_Transmit_IT(command->huart, m204_message, sizeof(m204_message));
-		}
-		else {
-			HAL_UART_Transmit_IT(command->huart, error_message, sizeof(error_message));
-		}
-	}
-
-	else {
+	// Check if the provided value for Ki is in the range 0-100%
+	if (command->flag_num < 0 || command->flag_num > 100){
 		HAL_UART_Transmit_IT(command->huart, error_message, sizeof(error_message));
+		return;
 	}
+
+	if(command->flag_id == 'T'){
+		command->Ki0 = command->flag_num * 0.001;
+		HAL_UART_Transmit_IT(command->huart, m204_message, sizeof(m204_message));
+		return;
+	}
+	if (command->flag_id == 'S'){
+		command->Ki1 = command->flag_num * 0.001;
+		HAL_UART_Transmit_IT(command->huart, m204_message, sizeof(m204_message));
+		return;
+	}
+
+	HAL_UART_Transmit_IT(command->huart, error_message, sizeof(error_message));
 
 }
 
@@ -178,25 +193,48 @@ void Command_M205(Command *command) {
 	/*
 	 * This command modifies derivative gain for G0 and G1 in a 0-100% range
 	 */
-	if (command->flag_num >= 0 && command->flag_num <= 100) {
-		if (command->flag_id == 'T'){
-				command->Kd0 = command->flag_num * 0.001;
-				HAL_UART_Transmit_IT(command->huart, m205_message, sizeof(m205_message));
-			}
-			else if (command->flag_id == 'S'){
-				command->Kd1 = command->flag_num * 0.001;
-				HAL_UART_Transmit_IT(command->huart, m205_message, sizeof(m205_message));
-			}
-			else{
-				HAL_UART_Transmit_IT(command->huart, error_message, sizeof(error_message));
-			}
+
+	// Check if the provided value for Kd is in the range 0-100%
+	if (command->flag_num < 0 || command->flag_num > 100) {
+		HAL_UART_Transmit_IT(command->huart, error_message, sizeof(error_message));
+		return;
 	}
 
-	else {
-		HAL_UART_Transmit_IT(command->huart, error_message, sizeof(error_message));
+	if (command->flag_id == 'T'){
+			command->Kd0 = command->flag_num * 0.001;
+			HAL_UART_Transmit_IT(command->huart, m205_message, sizeof(m205_message));
+			return;
 	}
+	if (command->flag_id == 'S'){
+		command->Kd1 = command->flag_num * 0.001;
+		HAL_UART_Transmit_IT(command->huart, m205_message, sizeof(m205_message));
+		return;
+	}
+
+	HAL_UART_Transmit_IT(command->huart, error_message, sizeof(error_message));
 
 }
+
+void Command_T0(Command *command){
+	/*
+	 * This command changes the threshold
+	 */
+	if (command->flag_id == 'T'){
+		command->threshold0 = command->flag_num;
+		HAL_UART_Transmit_IT(command->huart, t0_message, sizeof(t0_message));
+		return;
+	}
+	if (command->flag_id == 'S'){
+		command->threshold1 = command->flag_num;
+		HAL_UART_Transmit_IT(command->huart, t0_message, sizeof(t0_message));
+		return;
+	}
+
+	HAL_UART_Transmit_IT(command->huart, error_message, sizeof(error_message));
+
+}
+
+
 
 
 

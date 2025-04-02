@@ -130,7 +130,7 @@ void Stepper_SetSpeed(Stepper* stepper, float speed){
 	 * This function sets speed to a certain level by acting on the slave timer ARR register
 	 */
 
-	// this control avoids division by zero in new ARR value, stops the master timer by setting ARR=0
+	// This control avoids division by zero in new ARR value, stops the master timer by setting ARR=0
 	if (speed <= 0.0f) {
 		stepper->speed = 0;
 		__HAL_TIM_SET_AUTORELOAD(stepper->htim, 0);
@@ -138,7 +138,7 @@ void Stepper_SetSpeed(Stepper* stepper, float speed){
 	}
 
 	stepper->speed = speed;
-	// resetting the CNT to avoid CNT>ARR when speeding up (ARR decreases)
+	// Resetting the CNT to avoid CNT>ARR when speeding up (ARR decreases)
 	__HAL_TIM_SET_COUNTER(stepper->htim,0);
 	__HAL_TIM_SET_AUTORELOAD(stepper->htim, (uint32_t) clk_freq*stepper->stepDist/(stepper->speed*(stepper->htim->Instance->PSC+1))-1);
 	stepper->htim->Instance->EGR = TIM_EGR_UG;

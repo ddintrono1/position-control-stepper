@@ -61,7 +61,6 @@ float Ki;
 float Kd;
 int16_t distance;
 int16_t speed;
-uint8_t speed_threshold = 3;
 
 /* USER CODE END PV */
 
@@ -123,7 +122,7 @@ int main(void)
   Kp = 0.1;
   Ki = 0;
   Kd = 0;
-  PID_Init(&pid, Kp, Ki, Kd, -100, 100);
+  PID_Init(&pid, Kp, Ki, Kd, -100, 100, 0.0f);
 
   // Initializing setpoint
   PID_UpdateSetpoint(&pid, 0);
@@ -212,41 +211,34 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		 */
 		distance = TOF_GetFilteredDistance(0, 1500);
 
-		if (distance != -1){
-			speed = PID_Compute(&pid, distance, 0.01f);
-
-			// Change rotation direction depending on speed sign
-			if (speed <= 0){
-				Stepper_SetDirection(&nema_17, CLOCKWISE);
-			}
-			else{
-				Stepper_SetDirection(&nema_17, COUNTER_CLOCKWISE);
-			}
-
-			// Neglect small speeds to avoid oscillations around setpoint
-			if (fabs(speed) < speed_threshold) {
-				Stepper_SetSpeed(&nema_17, 0);
-			}
-			else{
-				Stepper_SetSpeed(&nema_17, fabs(speed));
-			}
-
-		}
-		else {
+		// Check if the error code distance has been returned
+		if (distance == -1){
 			return;
 		}
-	}
 
+		speed = PID_Compute(&pid, distance, 0.01f);
+
+		// Change rotation direction depending on speed sign
+		if (speed <= 0){
+			Stepper_SetDirection(&nema_17, CLOCKWISE);
+		}
+		else{
+			Stepper_SetDirection(&nema_17, COUNTER_CLOCKWISE);
+		}
+
+		Stepper_SetSpeed(&nema_17, fabs(speed));
+
+		}
 }
+
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 
 	if (huart->Instance == USART2){
 
-
+		// Check if the command has been lauched
 		if (*(rx_data+cnt) == '\r'){
 
-			// This part of code gets exected when the command is lauched from the terminal
 			Command_Parse(&g_command, rx_data);
 			Command_Execute(&g_command);
 			cnt = -1;
@@ -256,6 +248,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 		cnt++;
 		HAL_UART_Receive_IT(&huart2, rx_data+cnt, 1);
 	}
+
 }
 
 /* USER CODE END 4 */

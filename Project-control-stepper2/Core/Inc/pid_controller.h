@@ -9,6 +9,7 @@
 #define INC_PID_CONTROLLER_H_
 
 #include <stdint.h>
+#include <math.h>
 
 
 typedef struct {
@@ -21,13 +22,16 @@ typedef struct {
     float integral;   // Error accumulation
     float output_min; // Upper saturation bound
     float output_max; // Lower saturation bound
+    float threshold;  // No-action threshold
+
 } PID_Controller;
 
-void PID_Init(PID_Controller *pid, float Kp, float Ki, float Kd, float out_min, float out_max);
+void PID_Init(PID_Controller *pid, float Kp, float Ki, float Kd, float out_min, float out_max, float threshold);
 float PID_Compute(PID_Controller *pid, float measurement, float dt);
 void PID_UpdateSetpoint(PID_Controller* pid, float setpoint);
 void PID_UpdateProportional(PID_Controller* pid, float Kp);
 void PID_UpdateIntegral(PID_Controller* pid, float Ki);
 void PID_UpdateDerivative(PID_Controller* pid, float Kd);
+void PID_UpdateThreshold(PID_Controller* pid, float threshold);
 
 #endif /* INC_PID_CONTROLLER_H_ */

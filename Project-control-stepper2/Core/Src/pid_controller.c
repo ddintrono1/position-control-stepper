@@ -8,7 +8,7 @@
 #include "pid_controller.h"
 
 
-void PID_Init(PID_Controller *pid, float Kp, float Ki, float Kd, float out_min, float out_max) {
+void PID_Init(PID_Controller *pid, float Kp, float Ki, float Kd, float out_min, float out_max, float threshold) {
 	/*
 	 * This function initializes PID
 	 */
@@ -20,6 +20,8 @@ void PID_Init(PID_Controller *pid, float Kp, float Ki, float Kd, float out_min, 
     pid->integral = 0.0f;
     pid->output_min = out_min;
     pid->output_max = out_max;
+    pid->threshold = threshold;
+
 }
 
 float PID_Compute(PID_Controller *pid, float measurement, float dt) {
@@ -45,6 +47,9 @@ float PID_Compute(PID_Controller *pid, float measurement, float dt) {
     // Output saturation
     if (output > pid->output_max) output = pid->output_max;
     if (output < pid->output_min) output = pid->output_min;
+
+    // Null output if the computed control action is too low
+    if (fabs(output)< pid->threshold) output = 0.0f;
 
     // Updating previous error
     pid->prev_error = error;
@@ -79,3 +84,11 @@ void PID_UpdateDerivative(PID_Controller* pid, float Kd){
 	 */
 	pid->Kd = Kd;
 }
+
+void PID_UpdateThreshold(PID_Controller* pid, float threshold){
+	/*
+	 * This function updates the no-action threshold
+	 */
+	pid->threshold = threshold;
+}
+

@@ -31,6 +31,8 @@ typedef struct{
 	float Ki1;
 	float Kd0;
 	float Kd1;
+	float threshold0;
+	float threshold1;
 
 } Command;
 
@@ -43,5 +45,6 @@ void Command_G1(Command *command);
 void Command_M203(Command *command);
 void Command_M204(Command *command);
 void Command_M205(Command *command);
+void Command_T0(Command *command);
 
 #endif /* INC_COMMAND_H_ */
