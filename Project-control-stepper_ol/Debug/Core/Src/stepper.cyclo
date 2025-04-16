@@ -1,0 +1,12 @@
+../Core/Src/stepper.c:15:6:Stepper_Init	1
+../Core/Src/stepper.c:42:6:Stepper_Enable	1
+../Core/Src/stepper.c:46:6:Stepper_Disable	1
+../Core/Src/stepper.c:50:6:Stepper_Start	1
+../Core/Src/stepper.c:63:6:Stepper_Stop	1
+../Core/Src/stepper.c:72:6:Stepper_ToggleDirection	1
+../Core/Src/stepper.c:76:6:Stepper_SetDirection	1
+../Core/Src/stepper.c:80:6:Stepper_SetMicroStep	6
+../Core/Src/stepper.c:113:6:Stepper_SetSpeedLimit	1
+../Core/Src/stepper.c:117:6:Stepper_SetSpeed	1
+../Core/Src/stepper.c:124:6:Stepper_SpeedUp	1
+../Core/Src/stepper.c:128:6:Stepper_SetAcceleration	1
