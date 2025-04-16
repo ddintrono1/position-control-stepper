@@ -27,25 +27,25 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
  11 .ARM.attributes 00000030  00000000  00000000  0000e35c  2**0
                   CONTENTS, READONLY
- 12 .debug_info   0001cbcb  00000000  00000000  0000e38c  2**0
+ 12 .debug_info   0001ce0a  00000000  00000000  0000e38c  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 13 .debug_abbrev 000038da  00000000  00000000  0002af57  2**0
+ 13 .debug_abbrev 0000395d  00000000  00000000  0002b196  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_aranges 000016b0  00000000  00000000  0002e838  2**3
+ 14 .debug_aranges 000016c0  00000000  00000000  0002eaf8  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_rnglists 000011b3  00000000  00000000  0002fee8  2**0
+ 15 .debug_rnglists 000011bf  00000000  00000000  000301b8  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_macro  000250ca  00000000  00000000  0003109b  2**0
+ 16 .debug_macro  000250ca  00000000  00000000  00031377  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   0001d4d9  00000000  00000000  00056165  2**0
+ 17 .debug_line   0001d541  00000000  00000000  00056441  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    000db238  00000000  00000000  0007363e  2**0
+ 18 .debug_str    000db298  00000000  00000000  00073982  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000043  00000000  00000000  0014e876  2**0
+ 19 .comment      00000043  00000000  00000000  0014ec1a  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00006788  00000000  00000000  0014e8bc  2**2
+ 20 .debug_frame  000067d4  00000000  00000000  0014ec60  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 00000073  00000000  00000000  00155044  2**0
+ 21 .debug_line_str 00000073  00000000  00000000  00155434  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -1441,7 +1441,7 @@ void Command_M203(Command *command){
  8000f3a:	f893 3024 	ldrb.w	r3, [r3, #36]	@ 0x24
  8000f3e:	2b54      	cmp	r3, #84	@ 0x54
  8000f40:	d11a      	bne.n	8000f78 <Command_M203+0x68>
-		command->Kp0 = command->flag_num * 0.01;
+		command->Kp0 = command->flag_num * 0.04; // scaling factors, empirically determined
  8000f42:	687b      	ldr	r3, [r7, #4]
  8000f44:	6a9b      	ldr	r3, [r3, #40]	@ 0x28
  8000f46:	4618      	mov	r0, r3
@@ -1472,7 +1472,7 @@ void Command_M203(Command *command){
  8000f7a:	f893 3024 	ldrb.w	r3, [r3, #36]	@ 0x24
  8000f7e:	2b53      	cmp	r3, #83	@ 0x53
  8000f80:	d11a      	bne.n	8000fb8 <Command_M203+0xa8>
-		command->Kp1 = command->flag_num * 0.01;
+		command->Kp1 = command->flag_num * 0.04;
  8000f82:	687b      	ldr	r3, [r7, #4]
  8000f84:	6a9b      	ldr	r3, [r3, #40]	@ 0x28
  8000f86:	4618      	mov	r0, r3
@@ -1513,7 +1513,7 @@ void Command_M203(Command *command){
  8000fca:	bd80      	pop	{r7, pc}
  8000fcc:	f3af 8000 	nop.w
  8000fd0:	47ae147b 	.word	0x47ae147b
- 8000fd4:	3f847ae1 	.word	0x3f847ae1
+ 8000fd4:	3fa47ae1 	.word	0x3fa47ae1
  8000fd8:	0800c2ec 	.word	0x0800c2ec
  8000fdc:	0800c338 	.word	0x0800c338
 
@@ -1554,7 +1554,7 @@ void Command_M204(Command *command) {
  800100a:	f893 3024 	ldrb.w	r3, [r3, #36]	@ 0x24
  800100e:	2b54      	cmp	r3, #84	@ 0x54
  8001010:	d11a      	bne.n	8001048 <Command_M204+0x68>
-		command->Ki0 = command->flag_num * 0.001;
+		command->Ki0 = command->flag_num * 0.004;
  8001012:	687b      	ldr	r3, [r7, #4]
  8001014:	6a9b      	ldr	r3, [r3, #40]	@ 0x28
  8001016:	4618      	mov	r0, r3
@@ -1585,7 +1585,7 @@ void Command_M204(Command *command) {
  800104a:	f893 3024 	ldrb.w	r3, [r3, #36]	@ 0x24
  800104e:	2b53      	cmp	r3, #83	@ 0x53
  8001050:	d11a      	bne.n	8001088 <Command_M204+0xa8>
-		command->Ki1 = command->flag_num * 0.001;
+		command->Ki1 = command->flag_num * 0.004;
  8001052:	687b      	ldr	r3, [r7, #4]
  8001054:	6a9b      	ldr	r3, [r3, #40]	@ 0x28
  8001056:	4618      	mov	r0, r3
@@ -1626,7 +1626,7 @@ void Command_M204(Command *command) {
  800109a:	bd80      	pop	{r7, pc}
  800109c:	f3af 8000 	nop.w
  80010a0:	d2f1a9fc 	.word	0xd2f1a9fc
- 80010a4:	3f50624d 	.word	0x3f50624d
+ 80010a4:	3f70624d 	.word	0x3f70624d
  80010a8:	0800c2ec 	.word	0x0800c2ec
  80010ac:	0800c350 	.word	0x0800c350
 
@@ -1667,7 +1667,7 @@ void Command_M205(Command *command) {
  80010da:	f893 3024 	ldrb.w	r3, [r3, #36]	@ 0x24
  80010de:	2b54      	cmp	r3, #84	@ 0x54
  80010e0:	d11a      	bne.n	8001118 <Command_M205+0x68>
-			command->Kd0 = command->flag_num * 0.001;
+			command->Kd0 = command->flag_num * 0.004;
  80010e2:	687b      	ldr	r3, [r7, #4]
  80010e4:	6a9b      	ldr	r3, [r3, #40]	@ 0x28
  80010e6:	4618      	mov	r0, r3
@@ -1698,7 +1698,7 @@ void Command_M205(Command *command) {
  800111a:	f893 3024 	ldrb.w	r3, [r3, #36]	@ 0x24
  800111e:	2b53      	cmp	r3, #83	@ 0x53
  8001120:	d11a      	bne.n	8001158 <Command_M205+0xa8>
-		command->Kd1 = command->flag_num * 0.001;
+		command->Kd1 = command->flag_num * 0.004;
  8001122:	687b      	ldr	r3, [r7, #4]
  8001124:	6a9b      	ldr	r3, [r3, #40]	@ 0x28
  8001126:	4618      	mov	r0, r3
@@ -1739,7 +1739,7 @@ void Command_M205(Command *command) {
  800116a:	bd80      	pop	{r7, pc}
  800116c:	f3af 8000 	nop.w
  8001170:	d2f1a9fc 	.word	0xd2f1a9fc
- 8001174:	3f50624d 	.word	0x3f50624d
+ 8001174:	3f70624d 	.word	0x3f70624d
  8001178:	0800c2ec 	.word	0x0800c2ec
  800117c:	0800c368 	.word	0x0800c368
 
@@ -2210,8 +2210,8 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   // Sensor initialization with 100 mm calibration distance
-  TOF_Init(100);
- 8001456:	2064      	movs	r0, #100	@ 0x64
+  TOF_Init(200);
+ 8001456:	20c8      	movs	r0, #200	@ 0xc8
  8001458:	f000 fea6 	bl	80021a8 <TOF_Init>
 
   // Stepper initialization, microstepping initialization
@@ -2273,8 +2273,8 @@ int main(void)
                ms2_port, ms2_pin,
                ms3_port, ms3_pin,
                enable_port, enable_pin);
-  Stepper_SetMicroStep(&nema_17, QUARTER_STEP);
- 80014cc:	2104      	movs	r1, #4
+  Stepper_SetMicroStep(&nema_17, SIXTEENTH_STEP);
+ 80014cc:	2110      	movs	r1, #16
  80014ce:	482d      	ldr	r0, [pc, #180]	@ (8001584 <main+0x154>)
  80014d0:	f000 fb0c 	bl	8001aec <Stepper_SetMicroStep>
 
@@ -2316,7 +2316,7 @@ int main(void)
  8001528:	f009 f940 	bl	800a7ac <HAL_UART_Transmit_IT>
 
   // Starting uart communication
-  HAL_UART_Receive_IT(&huart2, rx_data , 1);
+  HAL_UART_Receive_IT(&huart2, rx_data, 1);
  800152c:	2201      	movs	r2, #1
  800152e:	4920      	ldr	r1, [pc, #128]	@ (80015b0 <main+0x180>)
  8001530:	481c      	ldr	r0, [pc, #112]	@ (80015a4 <main+0x174>)

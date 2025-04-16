@@ -64,8 +64,8 @@ uint8_t cnt=0;
 float Kp = 0.1f;
 float Ki = 0.0f;
 float Kd = 0.0f;
-float out_min = -100.0f;
-float out_max = 100.0f;
+float out_min = -400.0f;
+float out_max = 400.0f;
 float out_threshold = 0.0f;
 
 // Control data
@@ -141,7 +141,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   // Sensor initialization with 100 mm calibration distance
-  TOF_Init(100);
+  TOF_Init(200);
 
   // Stepper initialization, microstepping initialization
   Stepper_Init(&nema_17, step_angle,
@@ -152,7 +152,7 @@ int main(void)
                ms2_port, ms2_pin,
                ms3_port, ms3_pin,
                enable_port, enable_pin);
-  Stepper_SetMicroStep(&nema_17, QUARTER_STEP);
+  Stepper_SetMicroStep(&nema_17, SIXTEENTH_STEP);
 
   // Controller initialization
   PID_Init(&pid, Kp, Ki, Kd, out_min, out_max, out_threshold);
@@ -164,7 +164,7 @@ int main(void)
   HAL_UART_Transmit_IT(&huart2, command_help_message, sizeof(command_help_message));
 
   // Starting uart communication
-  HAL_UART_Receive_IT(&huart2, rx_data , 1);
+  HAL_UART_Receive_IT(&huart2, rx_data, 1);
 
   // Starting control timer
   HAL_TIM_Base_Start_IT(&htim7);
@@ -282,6 +282,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 		HAL_UART_Receive_IT(&huart2, rx_data+cnt, 1);
 	}
 
+}
+
+void _putchar(char c) {
+    ITM_SendChar(c);  // Abilita printf su ITM
 }
 
 /* USER CODE END 4 */

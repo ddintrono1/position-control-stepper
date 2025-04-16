@@ -150,12 +150,12 @@ void Command_M203(Command *command){
 	}
 
 	if (command->flag_id == 'T'){
-		command->Kp0 = command->flag_num * 0.01;
+		command->Kp0 = command->flag_num * 0.04; // scaling factors, empirically determined
 		HAL_UART_Transmit_IT(command->huart, m203_message, sizeof(m203_message));
 		return;
 	}
 	if (command->flag_id == 'S'){
-		command->Kp1 = command->flag_num * 0.01;
+		command->Kp1 = command->flag_num * 0.04;
 		HAL_UART_Transmit_IT(command->huart, m203_message, sizeof(m203_message));
 		return;
 	}
@@ -176,12 +176,12 @@ void Command_M204(Command *command) {
 	}
 
 	if(command->flag_id == 'T'){
-		command->Ki0 = command->flag_num * 0.001;
+		command->Ki0 = command->flag_num * 0.004;
 		HAL_UART_Transmit_IT(command->huart, m204_message, sizeof(m204_message));
 		return;
 	}
 	if (command->flag_id == 'S'){
-		command->Ki1 = command->flag_num * 0.001;
+		command->Ki1 = command->flag_num * 0.004;
 		HAL_UART_Transmit_IT(command->huart, m204_message, sizeof(m204_message));
 		return;
 	}
@@ -202,12 +202,12 @@ void Command_M205(Command *command) {
 	}
 
 	if (command->flag_id == 'T'){
-			command->Kd0 = command->flag_num * 0.001;
+			command->Kd0 = command->flag_num * 0.004;
 			HAL_UART_Transmit_IT(command->huart, m205_message, sizeof(m205_message));
 			return;
 	}
 	if (command->flag_id == 'S'){
-		command->Kd1 = command->flag_num * 0.001;
+		command->Kd1 = command->flag_num * 0.004;
 		HAL_UART_Transmit_IT(command->huart, m205_message, sizeof(m205_message));
 		return;
 	}
