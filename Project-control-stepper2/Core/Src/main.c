@@ -285,7 +285,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 }
 
 void _putchar(char c) {
-    ITM_SendChar(c);  // Abilita printf su ITM
+	/*
+	 * Enable ITM tracing
+	 */
+    ITM_SendChar(c);
 }
 
 /* USER CODE END 4 */

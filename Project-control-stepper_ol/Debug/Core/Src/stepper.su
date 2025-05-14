@@ -8,5 +8,5 @@
 ../Core/Src/stepper.c:80:6:Stepper_SetMicroStep	16	static
 ../Core/Src/stepper.c:113:6:Stepper_SetSpeedLimit	16	static
 ../Core/Src/stepper.c:117:6:Stepper_SetSpeed	16	static
-../Core/Src/stepper.c:124:6:Stepper_SpeedUp	16	static
-../Core/Src/stepper.c:128:6:Stepper_SetAcceleration	16	static
+../Core/Src/stepper.c:125:6:Stepper_SpeedUp	16	static
+../Core/Src/stepper.c:129:6:Stepper_SetAcceleration	16	static

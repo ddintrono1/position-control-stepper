@@ -41,5 +41,6 @@ void Command_G0(Command *command);
 void Command_M203(Command *command);
 void Command_M204(Command *command);
 void Command_M205(Command *command);
+void ComputeSpeedProfile(float* table, uint32_t total_steps, int max_speed, int acceleration, float step_displacement);
 
 #endif /* INC_COMMAND_H_ */

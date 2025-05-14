@@ -119,6 +119,7 @@ void Stepper_SetSpeed(Stepper* stepper, float speed){
 	// resetting the CNT to avoid CNT>ARR when speeding up (ARR decreases)
 	__HAL_TIM_SET_COUNTER(stepper->htim,0);
 	__HAL_TIM_SET_AUTORELOAD(stepper->htim, (uint32_t) clk_freq*stepper->stepDist/(stepper->speed*(stepper->htim->Instance->PSC+1))-1);
+	stepper->htim->Instance->EGR = TIM_EGR_UG;
 }
 
 void Stepper_SpeedUp(Stepper *stepper, float deltaSpeed){

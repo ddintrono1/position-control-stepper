@@ -8,7 +8,12 @@
 
 #include "command.h"
 #include "stepper.h"
+#include <stdlib.h>
+#include <math.h>
 
+extern float *speed_table;
+extern uint32_t speed_table_size;
+extern int last_position;
 
 uint8_t error_message[] = "ERROR: unvalid command\r\n";
 uint8_t g0_message[] = "G0 command launched\r\n";
@@ -72,18 +77,55 @@ void Command_Execute(Command *command){
 }
 
 void Command_G0(Command *command){
-	/*
-	 * This command operates the motor by handling the slave master ARR
-	 */
 
-	// Compute new array value based on the displacement per step value
-	int new_arr = command->flag_num / 0.0505;
-	__HAL_TIM_SET_AUTORELOAD(command->htim, new_arr);
-	Stepper_SetSpeedLimit(command->stepper, command->travelSpeed);
-	Stepper_SetAcceleration(command->stepper, command->travelAcceleration);
-	HAL_UART_Transmit_IT(command->huart, g0_message, sizeof(g0_message));
-	Stepper_Enable(command->stepper);
-	Stepper_Start(command->stepper);
+	float step_displacement = command->stepper->stepDist;
+
+    int total_steps = (command->flag_num - last_position) / step_displacement;
+
+    if (total_steps < 0){
+    	total_steps = fabs(total_steps);
+    	Stepper_SetDirection(command->stepper, CLOCKWISE);
+    }
+    else{
+    	Stepper_SetDirection(command->stepper, COUNTER_CLOCKWISE);
+    }
+
+    __HAL_TIM_SET_COUNTER(command->htim, 0);                    // Reset contatore
+    __HAL_TIM_SET_AUTORELOAD(command->htim, total_steps);       // Set ARR = numero passi
+    __HAL_TIM_CLEAR_IT(command->htim, TIM_IT_UPDATE);           // Pulisci eventuali interrupt vecchi
+    __HAL_TIM_ENABLE_IT(command->htim, TIM_IT_UPDATE);
+
+    // Verifica input
+    if (total_steps <= 0 || total_steps > 15000) {
+        HAL_UART_Transmit(command->huart, (uint8_t *)"Errore: passi non validi\r\n", 27, HAL_MAX_DELAY);
+        return;
+    }
+
+    // Libera vecchia tabella
+    if (speed_table != NULL) {
+        free(speed_table);
+        speed_table = NULL;
+    }
+
+    // Alloca nuova tabella
+    speed_table = malloc(total_steps * sizeof(float));
+    if (speed_table == NULL) {
+        HAL_UART_Transmit(command->huart, (uint8_t *)"Malloc fallito\r\n", 17, HAL_MAX_DELAY);
+        return;
+    }
+
+    speed_table_size = total_steps;
+
+    // Calcolo del profilo di velocità
+    ComputeSpeedProfile(speed_table, total_steps, command->travelSpeed, command->travelAcceleration, step_displacement);
+
+    // Update last position
+    last_position = command->flag_num;
+
+    // Avvio motore
+    HAL_UART_Transmit_IT(command->huart, g0_message, sizeof(g0_message));
+    Stepper_Enable(command->stepper);
+    Stepper_Start(command->stepper);
 }
 
 
@@ -151,6 +193,33 @@ void Command_M205(Command *command){
 
 }
 
+void ComputeSpeedProfile(float* table, uint32_t total_steps, int max_speed, int acceleration, float step_displacement) {
 
+    // Calcolo dei passi necessari per raggiungere max_speed
+    float acc_steps_f = (max_speed * max_speed) / (2.0f * acceleration * step_displacement);
+
+    if (2 * acc_steps_f > total_steps) {
+        // Non c'è spazio sufficiente per raggiungere max_speed
+        // Calcolo la massima velocità raggiungibile in metà dei passi disponibili
+        max_speed = sqrtf(2.0f * acceleration * step_displacement * (total_steps / 2));
+        acc_steps_f = (max_speed * max_speed) / (2.0f * acceleration * step_displacement);
+    }
+
+    uint32_t acc_steps = (uint32_t)acc_steps_f;
+    uint32_t dec_steps = total_steps - acc_steps;
+
+    for (uint32_t i = 0; i < total_steps; i++) {
+        if (i < acc_steps) {
+            table[i] = sqrtf(2.0f * acceleration * step_displacement * i);
+        } else if (i < dec_steps) {
+            table[i] = (float)max_speed;
+        } else {
+            table[i] = sqrtf(2.0f * acceleration * step_displacement * (total_steps - i));
+        }
+    }
+
+    // Evita stallo iniziale
+    if (table[0] < 0.1f) table[0] = 0.1f;
+}
 
 
