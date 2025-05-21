@@ -62,7 +62,7 @@ void Stepper_Start(Stepper* stepper){
 
 void Stepper_Stop(Stepper* stepper){
 
-	// Start PWM timer which pulses the stepper
+	// Stop PWM timer which pulses the stepper
 	HAL_TIM_PWM_Stop(stepper->htim, TIM_CHANNEL_1);
 
 	// Stop the timer responsible for accelerating the motor
@@ -110,10 +110,6 @@ void Stepper_SetMicroStep(Stepper* stepper, MicrosteppingMode divider){
 	}
 }
 
-void Stepper_SetSpeedLimit(Stepper* stepper, float speedLimit){
-	stepper->speedLimit = speedLimit;
-}
-
 void Stepper_SetSpeed(Stepper* stepper, float speed){
 	stepper->speed = speed;
 	// resetting the CNT to avoid CNT>ARR when speeding up (ARR decreases)
@@ -126,9 +122,6 @@ void Stepper_SpeedUp(Stepper *stepper, float deltaSpeed){
 	Stepper_SetSpeed(stepper, stepper->speed + deltaSpeed);
 }
 
-void Stepper_SetAcceleration(Stepper *stepper, float acceleration){
-	stepper->acceleration = acceleration;
-}
 
 
 

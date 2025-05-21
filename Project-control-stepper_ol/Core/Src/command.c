@@ -31,9 +31,7 @@ void Command_Init(Command *command, Stepper *stepper, TIM_HandleTypeDef *htim, U
 
 	// Setting default speeds and accelerations
 	command->travelSpeed = 40;
-	command->workSpeed = 20;
 	command->travelAcceleration = 30;
-	command->workAcceleration = 15;
 
 }
 
