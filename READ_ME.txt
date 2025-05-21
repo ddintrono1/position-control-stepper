@@ -1,0 +1,3 @@
+To fully meet the specifications of the assignment, the project was divided into two independent and self-contained subprojects, both aimed at achieving position control. The first subproject implements an open-loop control strategy, utilizing chained timers and a trapezoidal speed profile to manage motion precisely. The second subproject adopts a closed-loop control approach, integrating a Time-of-Flight sensor with a PID controller to dynamically adjust position based on real-time feedback.
+
+Despite their architectural differences, both implementations share a set of core functionalities and rely on common modular libraries, as detailed throughout the reports.
