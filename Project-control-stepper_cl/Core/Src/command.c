@@ -105,6 +105,9 @@ void Command_G0(Command *command){
 		PID_UpdateIntegral(command->pid, command->Ki0);
 		PID_UpdateDerivative(command->pid, command->Kd0);
 
+		// Discharge integral at new setpoint
+		command->pid->prev_error = 0;
+
 		PID_UpdateThreshold(command->pid, command->threshold0);
 
 		PID_UpdateSetpoint(command->pid, command->flag_num);

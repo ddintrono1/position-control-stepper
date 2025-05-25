@@ -7,6 +7,10 @@
 
 #include "pid_controller.h"
 
+volatile float error;
+volatile float P_out;
+volatile float I_out;
+
 
 void PID_Init(PID_Controller *pid, float Kp, float Ki, float Kd, float out_min, float out_max, float threshold) {
 	/*
@@ -28,14 +32,14 @@ float PID_Compute(PID_Controller *pid, float measurement, float dt) {
 	/*
 	 * This function initializes pid controller
 	 */
-    float error = pid->setpoint - measurement;
+    error = pid->setpoint - measurement;
 
     // Proportional contribution computation
-    float P_out = pid->Kp * error;
+    P_out = pid->Kp * error;
 
     // Integral contribution computation
     pid->integral += error * dt;
-    float I_out = pid->Ki * pid->integral;
+    I_out = pid->Ki * pid->integral;
 
     // Derivative contribution computation
     float derivative = (error - pid->prev_error) / dt;

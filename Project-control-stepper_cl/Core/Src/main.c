@@ -139,7 +139,7 @@ int main(void)
   MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
 
-  // Sensor initialization with 100 mm calibration distance
+  // Sensor initialization with 200 mm calibration distance
   TOF_Init(200);
 
   // Stepper initialization, microstepping initialization
@@ -289,6 +289,8 @@ void _putchar(char c) {
 	 */
     ITM_SendChar(c);
 }
+
+
 
 /* USER CODE END 4 */
 

@@ -3,5 +3,5 @@
 ../Core/Src/main.c:193:6:SystemClock_Config	3
 ../Core/Src/main.c:238:6:HAL_TIM_PeriodElapsedCallback	4
 ../Core/Src/main.c:267:6:HAL_UART_RxCpltCallback	3
-../Core/Src/main.c:286:6:_putchar	1
-../Core/Src/main.c:299:6:Error_Handler	1
+../Core/Src/main.c:286:6:_putchar	2
+../Core/Src/main.c:303:6:Error_Handler	1
